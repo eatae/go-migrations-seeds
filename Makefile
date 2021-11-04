@@ -21,7 +21,7 @@ migration-down:
 	${GOPATH}/bin/goose -dir ${MIGRATIONS_DIR} postgres ${DB_CONNECTION} down
 
 
-.PHONY: test
-test:
+.PHONY: debug
+debug:
 	echo ${DB_CONNECTION}
 	echo ${GOPATH}
