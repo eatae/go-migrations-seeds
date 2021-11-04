@@ -1,1 +1,1 @@
-package go_migration
+package main
