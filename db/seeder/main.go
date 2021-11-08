@@ -2,29 +2,37 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/joho/godotenv"
-	"os"
-	// postgres driver.
+	"github.com/jmoiron/sqlx"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"go_migrations_seeds/db/seeder/seeds"
+	"log"
+	"os"
 )
 
 func main() {
-	url := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Panic("Error loading .env file")
+	}
+	connString := fmt.Sprintf(
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		os.Getenv("DOCKER_DB_HOST"),
+		os.Getenv("DOCKER_DB_PORT"),
 		os.Getenv("DOCKER_DB_USER"),
-		os.Getenv("DB_PASSWORD"),
-		os.Getenv("DB_HOST"),
-		os.Getenv("DB_PORT"),
-		os.Getenv("DB_NAME"),
+		os.Getenv("DOCKER_DB_PASSWORD"),
+		os.Getenv("DOCKER_DB_NAME"),
 	)
-	fmt.Println(url)
-	os.Exit(0)
 
-	//db, err := sqlx.Open("postgres", url)
-	//if err != nil {
-	//	log.Fatalf("error opening a connection with the database %s\n", err)
-	//}
-	//
+	db, err := sqlx.Open("postgres", connString)
+	if err != nil {
+		log.Fatalf("error opening a connection with the database %s\n", err)
+	}
+
+	s := seeds.NewSeed(db)
+	s.DeptSeed()
+	s.EmpSeed()
+
 	//s := seeds.NewSeed(db)
 	//
 	//if err := seeder.Execute(s); err != nil {
