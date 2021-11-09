@@ -4,7 +4,6 @@ import (
 	"github.com/bxcodec/faker/v3"
 	"log"
 	"math/rand"
-	"strconv"
 	"time"
 )
 
@@ -15,10 +14,7 @@ func (s Seed) EmpSeed() {
 	var err error
 	var mgrNo interface{}
 
-	deptsNo, err := s.getDeptsNo()
-	if err != nil {
-		log.Fatalf("error seeding test_seeds: %v", err)
-	}
+	deptsNo := s.getDeptsNo()
 
 	for i := 1; i <= 100; i++ {
 		mgrNo = nil
@@ -46,13 +42,13 @@ func (s Seed) EmpSeed() {
 }
 
 // getDeptsNo
-func (s Seed) getDeptsNo() ([]int, error) {
+func (s Seed) getDeptsNo() []int {
 	var result []int
 	var deptno int
 
 	rows, err := s.db.Query("SELECT deptno FROM dept")
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
 	defer rows.Close()
 
@@ -67,7 +63,7 @@ func (s Seed) getDeptsNo() ([]int, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return result, nil
+	return result
 }
 
 // Get random Manager number
@@ -81,18 +77,15 @@ func (s Seed) getRandomManagerNo() int {
 }
 
 // Get random date
-func (s Seed) getRandomDate() time.Time {
+func (s Seed) getRandomDate() string {
 	min := time.Date(1975, 1, 0, 0, 0, 0, 0, time.UTC).Unix()
 	max := time.Date(2002, 12, 0, 0, 0, 0, 0, time.UTC).Unix()
 	delta := max - min
 
 	sec := rand.Int63n(delta) + min
+	t := time.Unix(sec, 0)
 
-	t, err := time.Parse("2006-01-02", strconv.FormatInt(sec, 10))
-	if err != nil {
-		log.Fatal(err)
-	}
-	return t
+	return t.Format("2006-01-02")
 }
 
 // Get random salary
@@ -103,7 +96,7 @@ func (s Seed) getRandomSalary() int {
 	return salaries[randIdx]
 }
 
-// Get random salary
+// Get random comm
 func (s Seed) getRandomComm() int {
 	var salaries = []int{0, 0, 130, 100, 500, 60, 700, 0, 0, 0}
 	randIdx := rand.Intn(len(jobs))
